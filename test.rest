@@ -1,0 +1,35 @@
+###
+GET http://127.0.0.1:8000/api/Messages 
+###
+GET http://127.0.0.1:8000/api/Messages/:_id 
+###
+GET http://127.0.0.1:8000/api/Messages/description/:texte 
+###
+GET http://127.0.0.1:8000/api/Messages/titre/:texte 
+###
+GET http://127.0.0.1:8000/api/Messages/auteur/:texte 
+### 
+DELETE http://127.0.0.1:8000/api/Messages/:_id 
+###
+POST http://127.0.0.1:8000/api/Messages 
+Content-Type: application/json
+
+{
+    "_id": "123",
+    "titre": "22222 Comment faire fructifier votre argent sans risques",
+    "auteur": "2222joseph@trucmachin.com",
+    "description": "222 Dans ce sujet nous allons blabla",
+    "date": "",
+    "langue": "français",
+    "commentaires": [
+        
+            "commentaire",
+            "auteur",
+            "date",
+    ]  
+}
+### 
+PUT http://127.0.0.1:8000/api/Messages/:_id 
+DELETE http://127.0.0.1:8000/api/livres/123456
+###
+PUT http://127.0.0.1:8000/api/livres/123456
