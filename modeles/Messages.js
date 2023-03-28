@@ -10,8 +10,9 @@ const mongoose = require('mongoose');
 
 let schemaMessages = mongoose.Schema({
     _id: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        auto: true
     },
     titre: {
         type: String,

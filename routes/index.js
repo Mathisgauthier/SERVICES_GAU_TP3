@@ -18,7 +18,7 @@ router.get('/public/*', (requete, reponse) => {
 });
 
 // Route to get all messages
-router.get('/api/messages', (requete, reponse) => {
+router.get('/api/Messages', (requete, reponse) => {
     Messages.find({}, (err, messages) => {
         if (err) throw err;
         reponse.json(messages);
