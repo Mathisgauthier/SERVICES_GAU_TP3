@@ -1,18 +1,20 @@
 /*
  * Auteur: Mathis Gauthier
- * Date: 6 mars 2023
+ * Date: 27 mars 2023
  * Description: modèle Mongoose pour accéder à la collection messages
  */
-
 const mongoose = require('mongoose');
 
-// schéma de données pour la collection Messages
+const commentaireSchema = new mongoose.Schema({
+    commentaire: String,
+    auteur: String,
+    date: Date,
+});
 
-let schemaMessages = mongoose.Schema({
+const messageSchema = new mongoose.Schema({
     _id: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
-        auto: true
     },
     titre: {
         type: String,
@@ -34,32 +36,35 @@ let schemaMessages = mongoose.Schema({
         type: String,
         required: true
     },
-    commentaires: {
-        type: Array,
-        required: false
-    }
+    commentaires: [commentaireSchema]
 });
 
-let Messages = module.exports = mongoose.model('Messages', schemaMessages);
+const Message = mongoose.model('Message', messageSchema);
+
+module.exports = Message;
 
 module.exports.getMessages = (callback, limit) => {
-    Messages.find(callback).limit(limit);
+    Message.find(callback).limit(limit);
 };
 
 module.exports.getMessagesParChamp = (nomChamp, critere, callback, limit) => {
     const query = {[nomChamp]: RegExp(critere)};
-    Messages.find(query, callback).limit(limit);
+    Message.find(query, callback).limit(limit);
 };
 
-module.exports.ajoutMessages = (Messages, callback) => {
-    Messages._id = new mongoose.Types.ObjectId();
-    Messages.date = new Date();
-    Messages.create(Messages, callback);
+module.exports.ajoutMessages = (nouveauMessage, callback) => {
+    const messageToCreate = {
+        ...nouveauMessage,
+        _id: new mongoose.Types.ObjectId(),
+        date: new Date(),
+    };
+    Message.create(messageToCreate, callback);
 };
+
 
 module.exports.supprimerMessages = (_idMessage, callback) => {
     let filtre = { "_id": _idMessage };
-    Messages.deleteOne(filtre, callback);
+    Message.deleteOne(filtre, callback);
 };
 
 module.exports.modifierMessages = (_idMessage, nouvMessages, callback) => {
@@ -74,5 +79,5 @@ module.exports.modifierMessages = (_idMessage, nouvMessages, callback) => {
         langue: nouvMessages.langue,
         commentaires: nouvMessages.commentaires,
     };
-    Messages.findOneAndUpdate(filtre, nouveauMessages, options, callback);
+    Message.findOneAndUpdate(filtre, nouveauMessages, options, callback);
 };

@@ -1,6 +1,6 @@
 /*
  * Auteur: Mathis Gauthier
- * Date: 6 mars 2023
+ * Date: 27 mars 2023
  * Description: modèle Mongoose pour obtenir les informations des messages
  */
 const express = require('express');
@@ -8,24 +8,32 @@ const router = express.Router();
 
 const Messages = require('../modeles/Messages');
 
-router.get('/', (requete, reponse) => {
-    Messages.getMessages((err, Messages)=>{
-        if (err) throw err;
-        reponse.json(Messages);
-    }, 5);
-});
+router.get("/", (req, res) => {
+    Messages.find({}, (err, messages) => {
+      if (err) {
+        console.log(err);
+        res.status(500).json({ error: "Erreur" });
+      } else {
+        res.json(messages);
+      }
+    });
+  });
 
 router.post('/', (requete, reponse) => {
-    let Messages = requete.body;
-    Messages.ajoutMessages( Messages, (err, retourMessages)=>{
-        if (err) throw err;
+    let nouveauMessage = requete.body;
+    Messages.ajoutMessages(nouveauMessage, (err, retourMessages) => {
+        if (err) {
+            console.error(err);
+            return reponse.status(500).json({ error: "Erreur d'ajout de message" });
+        }
         reponse.json(retourMessages);
-    });
+    });    
 });
 
+
 router.put('/:_idMessage', (requete, reponse)=>{
-    let nouveauMessages = requete.body;
-    Messages.modifierMessages(requete.params._idMessage, nouveauMessages, (err, resultat) => {
+    let nouveauMessage = requete.body;
+    Messages.modifierMessages(requete.params._idMessage, nouveauMessage, (err, resultat) => {
         if (err) throw err;
         reponse.json(resultat);
     });

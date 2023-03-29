@@ -11,7 +11,7 @@ GET http://127.0.0.1:8000/api/Messages/auteur/:texte
 ### 
 DELETE http://127.0.0.1:8000/api/Messages/:_id 
 ###
-POST http://127.0.0.1:8000/api/Messages 
+POST http://127.0.0.1:8000/api/Messages
 Content-Type: application/json
 
 {
@@ -22,12 +22,12 @@ Content-Type: application/json
     "date": "",
     "langue": "français",
     "commentaires": [
-        
-            "commentaire",
-            "auteur",
-            "date",
+        "commentaires",
+        "auteur",
+        "date"
     ]  
 }
+
 ### 
 PUT http://127.0.0.1:8000/api/Messages/:_id 
 DELETE http://127.0.0.1:8000/api/livres/123456

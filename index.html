@@ -4,71 +4,84 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devoir 2 Service Web</title>
+    <title>Devoir 3 Service Web</title>
     <style>
-        ul {
-            margin: 0px;
-            padding: 0px;
+        #contour {
+            margin: auto;
         }
-        li {
-            display: block;
-            margin: 10px 0px;
-            background-color:rgb(161, 161, 158);
-            padding: 3px 15px 10px 15px;
-        }
-        fieldset {
-            background-color: white;
+        #entete p {
+            font-size: 1.2em;
         }
         .col {
             display: inline-block;
+            width: 24%;
+            margin: 1%;
+            font-weight: bold;
+        }
+        .message {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .message .col {
+            font-weight: normal;
+        }
+        #ajoutMessagesForm {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f8f8f8;
+        }
+        form label {
+            display: inline-block;
+            width: 100px;
+            vertical-align: top;
+        }
+        form input[type="text"] {
+            margin-bottom: 10px;
+        }
+        .details {
+            display: none;
+            background-color: white;
         }
         .titre {
-            width: 50%;
-            vertical-align: middle;
+            width: 45%;
         }
         .auteur {
             width: 15%;
-            vertical-align: middle;
         }
         .derniere {
             width: 15%;
-            vertical-align: middle;
         }
         .reponse {
             width: 15%;
-            vertical-align: middle;
         }
-        #entete {
-            margin-top: 20px;
-            border-bottom: 1px solid;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .message {
+            background-color: rgba(112, 108, 108, 0.319);
+            padding: 0px;
         }
-        #entete p, #principal p {
-            margin: 0px 0px 5px 5px;
-        }
-        #contour {
-            border-left: 1px solid black;
-            border-top: 1px solid black;
+        #ajoutMessagesBtn {
+            margin-top: 10px;
+            margin-bottom: 5px;
+            margin-left: 15px;
+            padding: 7px 7px;
         }
         #header {
-            margin-top: 0px;
-            margin-left: 5px;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+            margin-left: 15px;
+            font-size: 2.2em;
         }
-        button {
-            margin-left: 3px;
+        #titre {
+            width: 300px;
         }
-        .inferieur {
-            display: none;
+        #description {
+            width: 300px;
+            margin-bottom: 15px;
+            border: 1px solid rgb(42, 107, 191);
+            box-shadow: 1px 1px 1px 1px rgb(42, 107, 191);
         }
-        legend {
-            cursor: pointer;
-        }
-        .reponse-fieldset {
-            border-color: blue;
+        #ajout {
+            padding: 5px 8px;
         }
     </style>
 </head>
@@ -76,129 +89,131 @@
     <div id="contour">
         <h1 id="header">Canal de discussion Service Web</h1>
         <button id="ajoutMessagesBtn">Ajouter un message</button>
-        <div id="ajoutMessagesForm">
-        </div>
         <div id="entete">
-            <p class="col titre">Titre</p>
+            <p class="col titre">Message</p>
             <p class="col auteur">Auteur</p>
             <p class="col derniere">Dernière réponse</p>
             <p class="col reponse">Nombre réponses</p>
+        </div>
+        <hr>
+        <div id="ajoutMessagesForm" style="display: none;">
+            <form id="newMessageForm">
+                <label for="titre">Titre:</label>
+                <input type="text" id="titre" name="titre" required>
+                <br>
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required></textarea>
+                <br>
+                <input id="ajout" type="submit" value="Ajouter ce message">
+            </form>
         </div>
         <div id="principal">
             <div id="loadingMessage">
               Patientez pendant que je charge les données sur les messages....
             </div>
-          </div>
-          
+        </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script>
-    /*function chargeLesMessages() {
-        fetch('http://127.0.0.1:8000/api/Messages')
-    .then(res => res.json())
-    .then(data => {
-      console.log(data);
-      const tousMesLI = data.map(valeur => affiche(valeur));
-      $("#principal").html("<ul>" + tousMesLI.join(" ") + "</ul>");
-      $("#loadingMessage").hide(); // Hide the loading message here
-      $(".inferieur").hide();
-      $(".superieur").click(function () {
-        $(".inferieur").hide();
-        $(this).find('.inferieur').show();
-      });
-    })
-    .catch(erreur => console.log(erreur));
-}
-*/
-function chargeLesMessages() {
-    fetch('http://127.0.0.1:8000/api/Messages')
-        .then(res => res.json())
-        .then(data => {
-            console.log("Raw data:", data);
-            const tousMesLI = data.map(valeur => affiche(valeur));
-            console.log("Generated HTML:", tousMesLI);
-            $("#principal").html("<ul>" + tousMesLI.join(" ") + "</ul>");
-            $(".inferieur").hide();
-            $(".superieur").click(function () {
-                $(".inferieur").hide();
-                $(this).find('.inferieur').show();
+        function deleteMessage(id) {
+            if (!confirm("Voulez-vous vraiment supprimer ce message?")) {
+                return;
+            }
+
+            fetch(`http://127.0.0.1:8000/api/Messages/${id}`, {
+                method: "DELETE",
+            })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`API request failed with status ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(() => {
+                chargeLesMessages();
+            })
+            .catch((erreur) => console.error("Error deleting message:", erreur));
+        }
+
+        function addMessage() {
+            const titre = $("#titre").val();
+            const description = $("#description").val();
+            const auteur = "jo@toto.com";
+            const langue = "francais";
+
+            fetch("http://127.0.0.1:8000/api/Messages", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    titre, description, auteur, langue
+                })
+            })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`Erreur ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(() => {
+                chargeLesMessages();
+            })
+            .catch((erreur) => console.error("Erreur lors de l'ajout du message"));
+        }
+        function affiche(message) {
+            const messageDiv = $(`<div class="message" data-id="${message._id}"></div>`);
+            messageDiv.append(`<p class="col titre">${message.titre}</p>`);
+            messageDiv.append(`<p class="col auteur">${message.auteur}</p>`);
+            messageDiv.append(`<p class="col derniere">${message.auteur}</p>`);
+            messageDiv.append(`<p class="col reponse">${message.commentaires.length}</p>`);
+
+            const details = $(`<fieldset class="details"><legend>Discussion - par ${message.auteur} - ${message.date} - <button onclick="deleteMessage('${message._id}')">Supprimer ce message</button></legend></fieldset>`);
+            details.append(`<p>Titre: ${message.titre}</p>`);
+            details.append(`<p>Description: ${message.description}</p>`);
+
+            messageDiv.append(details);
+            $("#principal").append(messageDiv);
+
+            messageDiv.on("click", () => {
+                details.slideToggle();
             });
-        })
-        .catch(erreur => console.log(erreur));
-}
+            const repondreBtn = $('<button class="repondre">Répondre</button>');
+            details.append(repondreBtn);
+        }
+    function chargeLesMessages() {
+        $("#principal").empty();
 
-    function postMessages(Messages) {
-    const url = 'http://127.0.0.1:8000/api/Messages';
-    fetch(url, {
-    method: "POST",
-    body: JSON.stringify(Messages),
-    headers: {
-    "Content-type": "application/json; charset=UTF-8"
+        fetch("http://127.0.0.1:8000/api/Messages")
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`Erreur requete ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                data.forEach((message) => {
+                    affiche(message);
+                });
+            })
+            .catch((erreur) => console.error("Erreur:", erreur));
     }
-    })
-    .then(res => res.json())
-    .then(resultat => {
-    console.log("resultat du post:", resultat);
-    $("#ajoutMessagesForm").html('');
-    $("#ajoutMessagesBtn").show();
-    chargeLesMessages();
-    })
-    .catch(err => console.log(err));
-    }
-    function affiche(Messages) {
-    return `<li class="superieur"> 
-        <p class="col titre">${Messages.titre}</p> 
-        <p class="col auteur">${Messages.auteur}</p> 
-        <p class="col derniere">${Messages.auteur}</p> 
-        <p class="col reponse">${Messages.reponse}</p> 
-        <div class="inferieur"> 
-            <fieldset> 
-                <legend>${Messages.auteur}-${Messages.date} - 
-                    </legend> 
-                    <p>Titre: ${Messages.titre}</p> 
-                    <p>Auteur: ${Messages.auteur}</p> 
-                    <p>Description: ${Messages.description}</p> 
-                    <p>Langue: ${Messages.langue}</p>
-                    <p>Date: ${Messages.date}</p> 
-                    <p>Commentaires: ${Messages.commentaires}</p>  
-                    <fieldset class="reponse-fieldset"> 
-                        <legend>Réponses - ${Messages.reponse}</legend> 
-                        ${Messages.reponses.map(r => `<p>${r.texte} - par ${r.auteur} - ${r.date}</p>`).join('')}
-    ).join('') } </fieldset> </fieldset> </div> </li>`;
-}
 
+    $(document).ready(function() {
+        chargeLesMessages();
 
-    $(document).ready(chargeLesMessages);
-    $("#ajoutMessagesBtn").click(() => {
-  $("#ajoutMessagesBtn").hide();
-  $("#ajoutMessagesForm").html(`
-    <form id="messageForm">
-      <label for="titre">Titre:</label>
-      <input type="text" id="titre" name="titre" required>
-      <label for="auteur">Auteur:</label>
-      <input type="text" id="auteur" name="auteur" required>
-      <label for="description">Description:</label>
-      <textarea id="description" name="description" required></textarea>
-      <label for="langue">Langue:</label>
-      <input type="text" id="langue" name="langue" required>
-      <button type="submit">Submit</button>
-    </form>
-  `);
+        $("#ajoutMessagesBtn").click(function() {
+            $("#ajoutMessagesForm").toggle();
+        });
 
-  $("#messageForm").submit((event) => {
-    event.preventDefault();
-
-    const newMessage = {
-      titre: $("#titre").val(),
-      auteur: $("#auteur").val(),
-      description: $("#description").val(),
-      langue: $("#langue").val(),
-    };
-
-    postMessages(newMessage);
-  });
-});
-
+        $("#newMessageForm").submit(function(e) {
+            e.preventDefault();
+            addMessage();
+            $(this).trigger("reset");
+            $("#ajoutMessagesForm").hide();
+        });
+    });
 </script>
 </body>
 </html>
